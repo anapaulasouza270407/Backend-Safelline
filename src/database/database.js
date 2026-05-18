@@ -17,7 +17,7 @@ class Database {
       // Test connection
       await this.pool.query('SELECT NOW()');
       console.log('💾 PostgreSQL connected successfully');
-      
+
       // Create tables
       await this.initTables();
     } catch (error) {
@@ -28,16 +28,20 @@ class Database {
 
   async initTables() {
     const createUsersTable = `
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(50) UNIQUE NOT NULL,
-        email VARCHAR(100) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        is_online BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        last_login TIMESTAMP
-      )
-    `;
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+
+    avatar VARCHAR(50) DEFAULT 'avatar1',
+
+    is_online BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP,
+    avatar VARCHAR(50) DEFAULT 'avatar1'
+  )
+`;
 
     await this.pool.query(createUsersTable);
     console.log('✅ Tables created/verified');
