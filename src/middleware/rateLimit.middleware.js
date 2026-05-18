@@ -1,21 +1,34 @@
-/**Tempo Limite para interação do usuario*/
 const rateLimit = require('express-rate-limit');
+
 const authLimiter = rateLimit({
-    windowMs: 5 * 60 * 1000, // 5 minutos
-    max: 20, // Limite de 00 requisições por IP
-    message: 'Too many requests from this IP, please try again after 5 minutes.',
-    standardHeaders: true, // Retorna informações  de rate limit nos headers
+  windowMs: 60 * 1000, // 1 minute
+  max: 20, // 20 requests per minute for testing
+  message: {
+    success: false,
+    message: 'Too many authentication attempts, please try again later.'
+  }
 });
+
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // 100 requests per minute
+  message: {
+    success: false,
+    message: 'Too many requests, please slow down.'
+  }
+});
+
 const messageLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // 1 minuto
-    max: 100, // Limite de 100 mensagens por ip
-    message: 'Too many messages sent from this IP, please try again after a minute.',
-    standardHeaders: true,
+  windowMs: 60 * 1000, // 1 minute
+  max: 10, // 10 messages per minute per room
+  message: {
+    success: false,
+    message: 'Too many messages, please slow down.'
+  }
 });
-const chatLimiter = rateLimit ({
-    windowMs: 3 * 60 * 1000, // 3 minutos
-    max: 50, // Limite de 50 conexões por IP
-    message: 'Too many chat connections from this IP, please try again after a minute.',
-    standardHeaders: true,
-});
-module.exports = {authLimiter, messageLimiter, chatLimiter};
+
+module.exports = {
+  authLimiter,
+  chatLimiter,
+  messageLimiter
+};
