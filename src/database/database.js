@@ -28,44 +28,99 @@ class Database {
 
   async initTables() {
     const createUsersTable = `
-  CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        avatar VARCHAR(100) DEFAULT 'avatar1',
+        is_online BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_login TIMESTAMP NULL
+      )
+    `;
 
-    avatar VARCHAR(50) DEFAULT 'avatar1',
+    const createRoomsTable = `
+      CREATE TABLE IF NOT EXISTS rooms (
+        id UUID PRIMARY KEY,
+        category VARCHAR(50) NOT NULL,
+        user1_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        user2_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        status VARCHAR(20) DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        ended_at TIMESTAMP NULL
+      )
+    `;
 
-    is_online BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_login TIMESTAMP,
-    avatar VARCHAR(50) DEFAULT 'avatar1'
-  )
-`;
+    const createMessagesTable = `
+      CREATE TABLE IF NOT EXISTS messages (
+        id UUID PRIMARY KEY,
+        room_id UUID NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+        sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
 
-    await this.pool.query(createUsersTable);
-    console.log('✅ Tables created/verified');
+    try {
+      await this.pool.query(createUsersTable);
+      await this.pool.query(createRoomsTable);
+      await this.pool.query(createMessagesTable);
+      console.log('✅ All tables created/verified');
+    } catch (error) {
+      console.error('❌ Error creating tables:', error);
+      throw error;
+    }
   }
 
   async query(text, params) {
-    const result = await this.pool.query(text, params);
-    return result.rows;
+    try {
+      if (!this.pool) {
+        throw new Error('Database pool not initialized');
+      }
+      const result = await this.pool.query(text, params);
+      return result.rows;
+    } catch (error) {
+      console.error('❌ Query error:', error.message);
+      throw error;
+    }
   }
 
   async get(text, params) {
-    const result = await this.pool.query(text, params);
-    return result.rows[0] || null;
+    try {
+      if (!this.pool) {
+        throw new Error('Database pool not initialized');
+      }
+      const result = await this.pool.query(text, params);
+      return result.rows[0] || null;
+    } catch (error) {
+      console.error('❌ Get error:', error.message);
+      throw error;
+    }
   }
 
   async run(text, params) {
-    const result = await this.pool.query(text + ' RETURNING id', params);
-    return { id: result.rows[0]?.id };
+    try {
+      if (!this.pool) {
+        throw new Error('Database pool not initialized');
+      }
+      const result = await this.pool.query(text + ' RETURNING id', params);
+      return { id: result.rows[0]?.id };
+    } catch (error) {
+      console.error('❌ Run error:', error.message);
+      throw error;
+    }
   }
 
   async close() {
-    if (this.pool) {
-      await this.pool.end();
-      console.log('💾 Database connection closed');
+    try {
+      if (this.pool) {
+        await this.pool.end();
+        console.log('💾 Database connection closed');
+      }
+    } catch (error) {
+      console.error('❌ Error closing database:', error.message);
     }
   }
 }

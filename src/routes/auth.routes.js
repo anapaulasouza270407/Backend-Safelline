@@ -6,20 +6,20 @@ const { authLimiter } = require('../middleware/rateLimit.middleware');
 
 const router = express.Router();
 
-// Public routes
-router.post('/register', 
-  // authLimiter,
+// Rotas públicas
+router.post('/register',
+  authLimiter,
   validate(schemas.register),
   authController.register
 );
 
 router.post('/login',
-  // authLimiter,
+  authLimiter,
   validate(schemas.login),
   authController.login
 );
 
-// Protected routes
+// Rotas protegidas
 router.post('/logout',
   authMiddleware,
   authController.logout

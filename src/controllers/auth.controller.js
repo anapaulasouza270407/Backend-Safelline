@@ -31,6 +31,14 @@ class AuthController {
   async login(req, res) {
     try {
       const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email e senha são obrigatórios'
+        });
+      }
+      
       const result = await authService.login(email, password);
       
       res.json({
@@ -46,16 +54,31 @@ class AuthController {
   }
 
   async logout(req, res) {
-    // In a real app, you might want to blacklist the token
-    res.json({
-      success: true,
-      message: 'Logout successful'
-    });
+    try {
+      res.json({
+        success: true,
+        message: 'Logout successful'
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
   }
 
   async getProfile(req, res) {
     try {
+      if (!req.user || !req.user.userId) {
+        return res.status(401).json({
+          success: false,
+          message: 'Unauthorized'
+        });
+      }
+
+      const authService = require('../services/auth.service');
       const user = await authService.getUserById(req.user.userId);
+      
       if (!user) {
         return res.status(404).json({
           success: false,

@@ -1,30 +1,36 @@
 const rateLimit = require('express-rate-limit');
 
 const authLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 20, // 20 requests per minute for testing
+  windowMs: 60 * 1000,
+  max: 5,
   message: {
     success: false,
-    message: 'Too many authentication attempts, please try again later.'
-  }
+    message: 'Muitas tentativas de autenticação. Tente novamente mais tarde.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
 });
 
 const chatLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 100, // 100 requests per minute
+  windowMs: 60 * 1000,
+  max: 100,
   message: {
     success: false,
-    message: 'Too many requests, please slow down.'
-  }
+    message: 'Muitas requisições. Tente novamente mais tarde.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
 });
 
 const messageLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 10, // 10 messages per minute per room
+  windowMs: 60 * 1000,
+  max: 10,
   message: {
     success: false,
-    message: 'Too many messages, please slow down.'
-  }
+    message: 'Muitas mensagens. Tente novamente mais tarde.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
 });
 
 module.exports = {

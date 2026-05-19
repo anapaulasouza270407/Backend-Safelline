@@ -35,10 +35,14 @@ class AuthService {
     const values = [username, email, passwordHash];
     
     console.log('📝 SQL Query:', query);
-    console.log('📝 SQL Values:', values);
+    console.log('📝 SQL Values:', [username, email, '***']);
     
     const result = await database.query(query, values);
-    const userId = result[0].id;
+    const userId = result[0]?.id;
+
+    if (!userId) {
+      throw new Error('Erro ao criar usuário');
+    }
 
     // Generate token
     const token = jwt.sign(
@@ -58,6 +62,10 @@ class AuthService {
   }
 
   async login(email, password) {
+    if (!email || !password) {
+      throw new Error('Email e senha são obrigatórios');
+    }
+
     const user = await database.get(
       'SELECT * FROM users WHERE email = $1',
       [email]
@@ -95,6 +103,10 @@ class AuthService {
   }
 
   async getUserById(userId) {
+    if (!userId) {
+      throw new Error('userId é obrigatório');
+    }
+
     return await database.get(
       'SELECT id, username, email, is_online FROM users WHERE id = $1',
       [userId]
@@ -102,6 +114,10 @@ class AuthService {
   }
 
   async setUserOnline(userId, isOnline) {
+    if (!userId) {
+      throw new Error('userId é obrigatório');
+    }
+
     await database.run(
       'UPDATE users SET is_online = $1 WHERE id = $2',
       [isOnline, userId]

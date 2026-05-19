@@ -1,23 +1,30 @@
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
+  if (!authHeader) {
     return res.status(401).json({
       success: false,
-      message: 'Access denied. No token provided.'
+      message: 'Token não enviado'
     });
   }
 
+  const token = authHeader.replace('Bearer ', '');
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+
+    // 🔥 ISSO É O MAIS IMPORTANTE
+    req.user = {
+      userId: decoded.userId
+    };
+
     next();
   } catch (error) {
-    res.status(401).json({
+    return res.status(401).json({
       success: false,
-      message: 'Invalid token.'
+      message: 'Token inválido'
     });
   }
 };
